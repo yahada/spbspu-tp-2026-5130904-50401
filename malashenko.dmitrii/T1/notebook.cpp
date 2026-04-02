@@ -53,6 +53,7 @@ void malashenko::Notebook::drop(std::istream&, std::ostream&, const std::string&
 {
   try
   {
+    notes_.at(name);
     notes_.erase(name);
   } catch(std::out_of_range &)
   {
