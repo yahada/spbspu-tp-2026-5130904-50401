@@ -29,15 +29,11 @@ int main()
       std::cin >> name;
       (nb.*cmds.at(cmd))(std::cin, std::cout, name);
     }
-    catch (const std::out_of_range &)
+    catch (...)
     {
       std::cout << "<INVALID COMMAND>\n";
       auto toignore = std::numeric_limits<std::streamsize>::max();
       std::cin.ignore(toignore, '\n');
-    }
-    catch (const std::logic_error&)
-    {
-      std::cout << "<INVALID COMMAND>\n";
     }
   }
 

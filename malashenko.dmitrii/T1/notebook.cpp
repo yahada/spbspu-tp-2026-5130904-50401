@@ -94,6 +94,7 @@ void malashenko::Notebook::halt(std::istream& in, std::ostream&, const std::stri
     in >> noteToRemove;
     try
     {
+      notes_.at(noteToRemove);
       notes_.at(name).get()->links_.at(noteToRemove);
     }
     catch(std::out_of_range &)
@@ -148,7 +149,7 @@ void malashenko::Notebook::expired(std::istream&, std::ostream& out, const std::
     size_t counter = 0;
     for (auto i = currNoteLinks.begin(); i != currNoteLinks.end(); ++i)
     {
-      if (!(i->second).lock().get())
+      if (!(i->second).lock())
       {
         counter++;
       }
