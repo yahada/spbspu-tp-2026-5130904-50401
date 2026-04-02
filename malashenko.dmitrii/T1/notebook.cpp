@@ -34,12 +34,15 @@ void malashenko::Notebook::show(std::istream&, std::ostream& out, const std::str
   try
   {
     auto text = notes_.at(name).get()->text_;
-    for (size_t i = 0; i < text.size(); ++i)
+    if (text.size())
     {
+      for (size_t i = 0; i < text.size(); ++i)
+      {
 
-      out << text[i] << '\n';
+        out << text[i] << '\n';
+      }
     }
-    out << '\n';
+
   } catch(std::out_of_range &)
   {
     throw std::logic_error("You don't have note with this name");
@@ -116,11 +119,14 @@ void malashenko::Notebook::mind(std::istream&, std::ostream& out, const std::str
       }
     }
 
-    for (size_t i = 0; i < resVec.size(); ++i)
+    if (resVec.size())
     {
-      out << resVec[resVec.size() - 1 - i] << '\n';
+      for (size_t i = 0; i < resVec.size(); ++i)
+      {
+        out << resVec[resVec.size() - 1 - i] << '\n';
+      }
     }
-    out << '\n';
+
   }
   catch(std::out_of_range &)
   {
