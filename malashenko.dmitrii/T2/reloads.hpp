@@ -16,18 +16,17 @@ namespace malashenko
     std::pair< long long, unsigned long long > num_;
   };
 
-  struct DelimiterIO
+  struct Delimiter
   {
-    std::string expected;
-    char& last;
+    char exp_;
   };
 
   struct StringIO
   {
-    std::string& ref_;
+    std::string ref_;
   };
 
-    struct LableIO
+    struct Lable
   {
     std::string exp_;
   };
@@ -53,12 +52,15 @@ namespace malashenko
     char fill_;
   };
 
-  std::istream& operator>>(std::istream& is, DBLLIT& dl);
-  std::istream& operator>>(std::istream& is, RATLSP& rl);
-  std::istream& operator>>(std::istream& is, DataStruct& ds);
-  std::istream& operator>>(std::istream& is, DelimiterIO& del);
-  std::istream& operator>>(std::istream& is, StringIO& str);
-  char check(std::istream& is, const std::string& expected);
+  std::istream& operator>>(std::istream& in, DBLLIT& dl);
+  std::istream& operator>>(std::istream& in, RATLSP& rl);
+  std::istream& operator>>(std::istream& in, DataStruct& ds);
+  std::istream& operator<<(std::istream& in, DataStruct& ds);
+  std::istream& operator>>(std::istream& in, const Delimiter& del);
+  std::istream& operator>>(std::istream& in, StringIO& str);
+  std::istream& operator>>(std::istream& in, Lable& str);
+  void checkChar(std::istream& in, const char& expected);
+  void checkStr(std::istream& in, const std::string& expected);
 }
 
 #endif
