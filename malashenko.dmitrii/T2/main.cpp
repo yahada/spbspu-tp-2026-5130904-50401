@@ -2,6 +2,7 @@
 #include "reloads.hpp"
 #include <vector>
 #include <iterator>
+#include <limits>
 #include <algorithm>
 
 int main()
@@ -9,7 +10,16 @@ int main()
   using data_t = malashenko::DataStruct;
   std::vector< data_t > data;
   using iit_t = std::istream_iterator< data_t >;
-  std::copy(iit_t {std::cin}, iit_t {}, std::back_inserter(data));
+
+  while (!std::cin.eof())
+  {
+    std::copy(iit_t {std::cin}, iit_t {}, std::back_inserter(data));
+    if (std::cin.fail())
+    {
+      std::cin.clear(std::cin.rdstate() & ~std::ios::failbit);
+      std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+    }
+  }
 
   std::sort(data.begin(), data.end());
 
