@@ -3,7 +3,6 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <vector>
 
 namespace malashenko
 {
@@ -19,25 +18,19 @@ namespace malashenko
 
   struct Delimiter
   {
-    std::vector< char > exp_;
+    char exp_;
   };
 
   struct StringIO
   {
-    std::string ref_;
-  };
-
-  struct Lable
-  {
-    std::string exp_;
-    bool isBeen_[3];
+    std::string& ref_;
   };
 
   struct DataStruct
   {
     DBLLIT key1_;
     RATLSP key2_;
-    StringIO key3_;
+    std::string key3_;
   };
 
   class IOguard
@@ -56,17 +49,13 @@ namespace malashenko
   std::istream& operator>>(std::istream& in, DBLLIT& dl);
   std::istream& operator>>(std::istream& in, RATLSP& rl);
   std::istream& operator>>(std::istream& in, DataStruct& ds);
+  std::istream& operator>>(std::istream& in, Delimiter&& del);
+  std::istream& operator>>(std::istream& in, StringIO&& dest);
   std::ostream& operator<<(std::ostream& out, const DataStruct& ds);
-  std::istream& operator>>(std::istream& in, const Delimiter& del);
-  std::istream& operator>>(std::istream& in, StringIO&& str);
-  std::istream& operator>>(std::istream& in, Lable&& str);
 
   bool operator<(const RATLSP& lhs, const RATLSP& rhs);
-  bool operator==(const DBLLIT& lhs, const DBLLIT& rhs);
-
+  bool operator==(const RATLSP& lhs, const RATLSP& rhs);
   bool operator<(const DataStruct& lhs, const DataStruct& rhs);
-  void checkChar(std::istream& in, const std::vector< char >& expected);
-  void checkStr(std::istream& in, Lable& lbl);
 }
 
 #endif

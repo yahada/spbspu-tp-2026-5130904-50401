@@ -1,5 +1,4 @@
 #include "reloads.hpp"
-#include <iostream>
 #include <algorithm>
 #include <cstring>
 
@@ -7,15 +6,37 @@ namespace malashenko
 {
   std::istream& operator>>(std::istream& in, DBLLIT& dl)
   {
+    double num = 0.0;
+    if (!(in >> num))
+    {
+      return in;
+    }
+
+    char c = 0;
+    if (!(in >> c) || (c != 'd' && c != 'D'))
+    {
+      in.setstate(std::ios::failbit);
+      return in;
+    }
+
+    dl.num_ = num;
+    return in;
+  }
+
+  std::istream& operator>>(std::istream& in, Delimiter&& del)
+  {
     std::istream::sentry sentry(in);
     if (!sentry)
     {
       return in;
     }
-    IOguard guard(in);
-    double num = 0.0;
-    in >> num >> Delimiter{{'d', 'D'}};
-    dl.num_ = num;
+
+    char c = 0;
+    in >> c;
+    if (in && c != del.exp_)
+    {
+      in.setstate(std::ios_base::failbit);
+    }
     return in;
   }
 
@@ -26,11 +47,18 @@ namespace malashenko
     {
       return in;
     }
-    IOguard guard(in);
+
     long long n = 0;
     unsigned long long d = 0;
     using d_t = Delimiter;
-    in >> d_t{ {'('}} >> d_t{ {':'}} >> d_t{ {'N'}} >> n >> d_t{ {':'}} >> d_t{ {'D'}} >> d >> d_t{ {':'}} >> d_t{ {')'}};
+
+    in >> d_t{'('} >> d_t{':'} >> d_t{'N'} >> n >> d_t{':'} >> d_t{'D'} >> d >> d_t{':'} >> d_t{')'};
+
+    if (!in || d == 0)
+    {
+      in.setstate(std::ios::failbit);
+      return in;
+    }
     rl.num_.first = n;
     rl.num_.second = d;
     return in;
@@ -38,56 +66,25 @@ namespace malashenko
 
   bool operator<(const RATLSP& lhs, const RATLSP& rhs)
   {
-    double num1 = static_cast< double >(lhs.num_.first) / lhs.num_.second;
-    double num2 = static_cast< double >(rhs.num_.first) / rhs.num_.second;
-    return num1 < num2;
+    return lhs.num_.first * rhs.num_.second < rhs.num_.first * lhs.num_.second;
   }
 
   bool operator==(const RATLSP& lhs, const RATLSP& rhs)
   {
-    double num1 = static_cast< double >(lhs.num_.first) / lhs.num_.second;
-    double num2 = static_cast< double >(rhs.num_.first) / rhs.num_.second;
-    return num1 == num2;
+    return lhs.num_.first * rhs.num_.second == rhs.num_.first * lhs.num_.second;
+
   }
 
-  std::istream& operator>>(std::istream& in, StringIO& str)
+  std::istream& operator>>(std::istream& in, StringIO&& dest)
   {
     std::istream::sentry sentry(in);
     if (!sentry)
     {
       return in;
     }
-    IOguard guard(in);
-    return in >> str.ref_;
+    return std::getline(in >> Delimiter{'"'}, dest.ref_, '"');
   }
 
-
-  std::istream& operator>>(std::istream& in, const Delimiter& del)
-  {
-    std::istream::sentry sentry(in);
-    if (!sentry)
-    {
-      return in;
-    }
-    IOguard guard(in);
-
-    checkChar(in, del.exp_);
-    return in;
-  }
-
-  std::istream& operator>>(std::istream& in, Lable& lbl)
-  {
-    std::istream::sentry sentry(in);
-    if (!sentry)
-    {
-      return in;
-    }
-    IOguard guard(in);
-
-    checkStr(in, lbl);
-
-    return in;
-  }
 
   std::istream& operator>>(std::istream& in, DataStruct& ds)
   {
@@ -96,64 +93,90 @@ namespace malashenko
     {
       return in;
     }
-    IOguard guard(in);
 
-    DataStruct data;
-    using d_t = Delimiter;
-    using l_t = Lable;
-    DBLLIT dl;
-    RATLSP rl;
-    StringIO str;
-    in >> d_t{{'('}} >> d_t{{':'}} >> l_t{"key1"} >> dl >> d_t{{':'}} >> l_t{"key2"} >> rl >> d_t{{':'}} >> l_t{"key3"} >> str >> d_t{{':'}} >> d_t{{')'}};
-    if (in)
+    DBLLIT k1{};
+    RATLSP k2{};
+    std::string k3{};
+
+    bool got1 = false, got2 = false, got3 = false;
+
+    in >> Delimiter{'('} >> Delimiter{':'};
+
+    while (in && in.peek() != ')')
     {
-      data.key1_ = dl;
-      data.key2_ = rl;
-      data.key3_ = str;
-      ds = data;
+      std::string key;
+      in >> key;
+
+      if (!in)
+      {
+        return in;
+      }
+
+      if (key == "key1")
+      {
+        in >> k1;
+        got1 = true;
+      }
+      else if (key == "key2")
+      {
+        in >> k2;
+        got2 = true;
+      }
+      else if (key == "key3")
+      {
+        in >> StringIO{k3};
+        got3 = true;
+      }
+      else
+      {
+        in.setstate(std::ios::failbit);
+        return in;
+      }
+
+      in >> Delimiter{':'};
     }
+
+    in >> Delimiter{')'};
+
+    if (!in || !got1 || !got2 || !got3)
+    {
+      in.setstate(std::ios::failbit);
+      return in;
+    }
+
+    ds.key1_ = k1;
+    ds.key2_ = k2;
+    ds.key3_ = k3;
+
     return in;
   }
 
   std::ostream& operator<<(std::ostream& out, const DataStruct& ds)
   {
-    out << "(:key1 " << ds.key1_.num_ << ":key2 (:N " << ds.key2_.num_.first << ":D " << ds.key2_.num_.second << ":):key3 " << '"' << ds.key3_.ref_ << '"' << ":)";
+    IOguard guard(out);
+    out << "(:key1 " << ds.key1_.num_;
+    if (static_cast<long long>(ds.key1_.num_) == ds.key1_.num_)
+    {
+      out << ".0";
+    }
+    out << "d:key2 (:N " << ds.key2_.num_.first << ":D " << ds.key2_.num_.second;
+    out << ":):key3 " << '"' << ds.key3_ << '"' << ":)";
     return out;
   }
 
   bool operator<(const DataStruct& lhs, const DataStruct& rhs)
   {
-    if (lhs.key1_.num_ < rhs.key1_.num_)
+    if (lhs.key1_.num_ != rhs.key1_.num_)
     {
-      return true;
-    }
-    else if (lhs.key1_.num_ > rhs.key1_.num_)
-    {
-      return false;
-    }
-    else
-    {
-      if (lhs.key2_ < rhs.key2_)
-      {
-        return true;
-      }
-      else if (rhs.key2_ < lhs.key2_)
-      {
-        return false;
-      }
-      else
-      {
-        if (lhs.key3_.ref_.length() < rhs.key3_.ref_.length())
-        {
-          return true;
-        }
-        else
-        {
-          return false;
-        }
-      }
+      return lhs.key1_.num_ < rhs.key1_.num_;
     }
 
+    if (!(lhs.key2_ == rhs.key2_))
+    {
+      return lhs.key2_ < rhs.key2_;
+    }
+
+    return lhs.key3_.size() < rhs.key3_.size();
   }
 
 
@@ -171,31 +194,5 @@ namespace malashenko
     s_.width(width_);
     s_.flags(fmt_);
     s_.fill(fill_);
-  }
-
-  void checkChar(std::istream& in, const std::vector< char >& expected)
-  {
-    char c = 0;
-    if (in >> c && std::find(expected.begin(), expected.end(), c) != expected.end())
-    {
-      in.setstate(std::ios::failbit);
-    }
-  }
-
-  void checkStr(std::istream& in, Lable& lbl)
-  {
-    std::string str = "";
-    StringIO io{ str };
-    if (in >> io && lbl.exp_ != str)
-    {
-      in.setstate(std::ios::failbit);
-    }
-    if (io.ref_ == "key1")
-    {
-      lbl.isBeen_[0] = true;
-    }
-    else if (io.ref_ == "key2")
-    {
-    }
   }
 }

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "reloads.hpp"
 #include <vector>
 #include <iterator>
@@ -20,10 +19,8 @@ int main()
       std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     }
   }
-
   std::sort(data.begin(), data.end());
 
   using oit_t = std::ostream_iterator< data_t >;
-  std::copy(std::begin(data), std::end(data), oit_t{std::cout, "\n"});
+  std::copy(data.begin(), data.end(), oit_t{std::cout, "\n"});
 }
-
