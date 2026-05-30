@@ -8,8 +8,6 @@
 
 namespace malashenko
 {
-
-
   struct Point
   {
     int x, y;
@@ -21,10 +19,9 @@ namespace malashenko
 
   struct Triangle {
     Triangle() = default;
-    Triangle(const Point&, const Point&, const Point&, const Polygon& pol);
+    Triangle(const Point&, const Point&, const Point&);
 
     Point t1, t2, t3;
-    Polygon parentPolygon;
   };
 
 

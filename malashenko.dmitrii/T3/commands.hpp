@@ -5,10 +5,12 @@
 
 namespace malashenko
 {
-  void area(std::istream&, std::ostream&, const Figures&);
-  void max(std::istream&, std::ostream&, const Figures&);
-  void min(std::istream&, std::ostream&, const Figures&);
-  void count(std::istream&, std::ostream&, const Figures&);
+
+
+  void area(std::istream&, std::ostream&, const Figures& figures);
+  void max(std::istream&, std::ostream&, const Figures& figures);
+  void min(std::istream&, std::ostream&, const Figures& figures);
+  void count(std::istream&, std::ostream&, const Figures& figures);
 }
 
 

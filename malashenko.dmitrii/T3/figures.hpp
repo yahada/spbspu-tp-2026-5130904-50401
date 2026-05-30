@@ -1,11 +1,14 @@
 #ifndef FIGURES
 #define FIGURES
 #include "polygon.hpp"
+#include "reloads.hpp"
 
 namespace malashenko
 {
   class Figures {
   public:
+    void getData(std::istream& in);
+
     double getAreaByParity(bool isEven) const;
     double getAreaByAmountOfVertexes(size_t amount) const;
     double getAverageArea() const;

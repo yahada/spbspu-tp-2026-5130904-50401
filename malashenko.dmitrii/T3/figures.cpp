@@ -1,4 +1,5 @@
 #include "figures.hpp"
+#include <iterator>
 
 std::vector< double > malashenko::Figures::getPolygonsAreas(const std::vector< Polygon >& polygons) const
 {
@@ -112,4 +113,14 @@ size_t malashenko::Figures::getAmountOfFiguresByAmountOfVertexes(size_t amount) 
 {
   std::vector< Polygon > filteredPolygons = filterByAmountOfVertexes(amount);
   return filteredPolygons.size();
+}
+
+void malashenko::Figures::getData(std::istream& in)
+{
+  std::vector< Polygon > polygons;
+
+  std::copy(std::istream_iterator< Polygon >(in),
+            std::istream_iterator< Polygon >(),
+            std::back_inserter(polygons));
+  polygons_ = polygons;
 }

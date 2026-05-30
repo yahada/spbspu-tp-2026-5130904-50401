@@ -4,16 +4,15 @@ using p_t = malashenko::Point;
 using pol_t = malashenko::Polygon;
 
 
-malashenko::Triangle::Triangle(const p_t& a, const p_t& b, const p_t& c, const pol_t& pol):
+malashenko::Triangle::Triangle(const p_t& a, const p_t& b, const p_t& c):
   t1(a),
   t2(b),
-  t3(c),
-  parentPolygon(pol)
+  t3(c)
 {}
 
 malashenko::Triangle malashenko::makeTriangle(const pol_t& pol, const p_t& p1, const p_t& p2)
 {
-  Triangle tri(pol.points[0], p1, p2, pol);
+  Triangle tri(pol.points[0], p1, p2);
   return tri;
 }
 
