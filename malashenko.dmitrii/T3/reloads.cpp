@@ -82,35 +82,6 @@ std::istream& malashenko::operator>>(std::istream& in, Polygon& pol)
   return in;
 }
 
-std::istream& malashenko::operator>>(std::istream& in, Commands& cmds)
-{
-  std::istream::sentry sentry(in);
-  if (!sentry)
-  {
-    return in;
-  }
 
-  std::string cmd;
-  if (!(in >> cmd))
-  {
-    return in;
-  }
 
-  std::map< std::string, void (*)(std::istream&, std::ostream&, const Figures&) > commands;
-  commands["AREA"] = area;
-  commands["MAX"] = max;
-  commands["MIN"] = min;
-  commands["COUNT"] = count;
-
-  try
-  {
-    commands.at(cmd)(in, std::cout, cmds.figures);
-  }
-  catch (...)
-  {
-    std::cout << "<INVALID COMMAND>" << '\n';
-    in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
-  }
-  return in;
-}
 

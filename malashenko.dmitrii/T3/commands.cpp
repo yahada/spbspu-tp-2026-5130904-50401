@@ -1,8 +1,13 @@
 #include "commands.hpp"
+#include <assert.h>
 
 
-void malashenko::area(std::istream& in, std::ostream& out, const Figures& figures)
+malashenko::Figures* malashenko::Commands::figures = nullptr;
+
+void malashenko::Commands::area(std::istream& in, std::ostream& out)
 {
+  assert(figures != nullptr);
+  std::cout << figures << '\n';
   std::string param;
   if (!(in >> param))
   {
@@ -12,7 +17,7 @@ void malashenko::area(std::istream& in, std::ostream& out, const Figures& figure
   try
   {
     size_t amountOfVertexes = std::stoull(param);
-    out << figures.getAreaByAmountOfVertexes(amountOfVertexes);
+    out << figures->getAreaByAmountOfVertexes(amountOfVertexes) << '\n';
     return;
   }
   catch(...)
@@ -21,26 +26,29 @@ void malashenko::area(std::istream& in, std::ostream& out, const Figures& figure
   double res = 0;
   if (param == "EVEN")
   {
-    res = figures.getAreaByParity(true);
+    res = figures->getAreaByParity(true);
   }
   else if (param == "ODD")
   {
-    res = figures.getAreaByParity(false);
+    res = figures->getAreaByParity(false);
   }
   else if (param == "MEAN")
   {
-    res = figures.getAverageArea();
+    res = figures->getAverageArea();
   }
   else
   {
     throw std::invalid_argument("UNKNOWN PARAMETR");
   }
-  out << res;
+  out << res << '\n';
 }
 
 
-void malashenko::max(std::istream& in, std::ostream& out, const Figures& figures)
+void malashenko::Commands::max(std::istream& in, std::ostream& out)
 {
+  assert(figures != nullptr);
+  std::cout << figures << '\n';
+
   std::string param;
   if (!(in >> param))
   {
@@ -50,21 +58,24 @@ void malashenko::max(std::istream& in, std::ostream& out, const Figures& figures
   double res = 0;
   if (param == "AREA")
   {
-    res = figures.getMaxArea();
+    res = figures->getMaxArea();
   }
   else if (param == "VERTEXES")
   {
-    res = figures.getMaxAmoutOfVertexes();
+    res = figures->getMaxAmoutOfVertexes();
   }
   else
   {
     throw std::invalid_argument("UNKNOWN PARAMETR");
   }
-  out << res;
+  out << res << '\n';
 }
 
-void malashenko::min(std::istream& in, std::ostream& out, const Figures& figures)
+void malashenko::Commands::min(std::istream& in, std::ostream& out)
 {
+  assert(figures != nullptr);
+  std::cout << figures << '\n';
+
   std::string param;
   if (!(in >> param))
   {
@@ -74,22 +85,25 @@ void malashenko::min(std::istream& in, std::ostream& out, const Figures& figures
   double res = 0;
   if (param == "AREA")
   {
-    res = figures.getMinArea();
+    res = figures->getMinArea();
   }
   else if (param == "VERTEXES")
   {
-    res = figures.getMinAmoutOfVertexes();
+    res = figures->getMinAmoutOfVertexes();
   }
   else
   {
     throw std::invalid_argument("UNKNOWN PARAMETR");
   }
-  out << res;
+  out << res << '\n';
 }
 
 
-void malashenko::count(std::istream& in, std::ostream& out, const Figures& figures)
+void malashenko::Commands::count(std::istream& in, std::ostream& out)
 {
+  assert(figures != nullptr);
+  std::cout << figures << '\n';
+
   std::string param;
   if (!(in >> param))
   {
@@ -99,7 +113,7 @@ void malashenko::count(std::istream& in, std::ostream& out, const Figures& figur
   try
   {
     size_t amountOfVertexes = std::stoull(param);
-    out << figures.getAmountOfFiguresByAmountOfVertexes(amountOfVertexes);
+    out << figures->getAmountOfFiguresByAmountOfVertexes(amountOfVertexes);
     return;
   }
   catch(...)
@@ -108,17 +122,55 @@ void malashenko::count(std::istream& in, std::ostream& out, const Figures& figur
   double res = 0;
   if (param == "EVEN")
   {
-    res = figures.getAmountOfFiguresByParity(true);
+    res = figures->getAmountOfFiguresByParity(true);
   }
   else if (param == "ODD")
   {
-    res = figures.getAmountOfFiguresByParity(false);
+    res = figures->getAmountOfFiguresByParity(false);
   }
   else
   {
     throw std::invalid_argument("UNKNOWN PARAMETR");
   }
-  out << res;
+  out << res << '\n';
 }
 
 
+std::istream& malashenko::operator>>(std::istream& in, Commands& cmds)
+{
+  std::istream::sentry sentry(in);
+  if (!sentry)
+  {
+    return in;
+  }
+
+  std::string cmd;
+  if (!(in >> cmd))
+  {
+    return in;
+  }
+
+
+
+
+  using cmd_t = void (Commands::*)(std::istream&, std::ostream&);
+  static std::map< std::string, cmd_t > commands
+  {
+    {"AREA", &Commands::area},
+    {"MAX", &Commands::max},
+    {"MIN", &Commands::min},
+    {"COUNT", &Commands::count}
+  };
+
+
+  try
+  {
+    (cmds.*commands.at(cmd))(in, std::cout);
+  }
+  catch (...)
+  {
+    std::cout << "<INVALID COMMAND>" << '\n';
+    in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+  }
+  return in;
+}
