@@ -1,14 +1,17 @@
 #include "polygon.hpp"
 
+using p_t = malashenko::Point;
+using pol_t = malashenko::Polygon;
 
-malashenko::Triangle::Triangle(const malashenko::Point& a, const malashenko::Point& b, const malashenko::Point& c, const Polygon& pol):
+
+malashenko::Triangle::Triangle(const p_t& a, const p_t& b, const p_t& c, const pol_t& pol):
   t1(a),
   t2(b),
   t3(c),
   parentPolygon(pol)
 {}
 
-malashenko::Triangle malashenko::makeTriangle(const Polygon& pol, const malashenko::Point& p1, const malashenko::Point& p2)
+malashenko::Triangle malashenko::makeTriangle(const pol_t& pol, const p_t& p1, const p_t& p2)
 {
   Triangle tri(pol.points[0], p1, p2, pol);
   return tri;
@@ -24,14 +27,15 @@ double malashenko::countTriangleArea(const Triangle& tri)
 }
 
 
-std::vector< malashenko::Triangle > malashenko::convertToTriangles(const Polygon& pol)
+std::vector< malashenko::Triangle > malashenko::convertToTriangles(const pol_t& pol)
 {
+  using namespace std::placeholders;
   std::vector< Triangle > res(pol.points.size() - 2);
   std::transform(++pol.points.cbegin(),
                   pol.points.cend(),
                   (pol.points.cbegin() + 2),
                   res.begin(),
-                  std::bind(makeTriangle, pol, std::placeholders::_1, std::placeholders::_2));
+                  std::bind(makeTriangle, pol, _1, _2));
   return res;
 }
 

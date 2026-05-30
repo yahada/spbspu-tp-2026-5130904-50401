@@ -8,6 +8,8 @@
 
 namespace malashenko
 {
+
+
   struct Point
   {
     int x, y;
@@ -34,6 +36,7 @@ namespace malashenko
   std::vector< double > convertToAreas(const std::vector< Triangle >&);
 
   double sumArea(const std::vector< double >&);
+
 }
 
 
