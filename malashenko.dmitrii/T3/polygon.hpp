@@ -8,7 +8,8 @@
 
 namespace malashenko
 {
-  struct Point {
+  struct Point
+  {
     int x, y;
   };
 
@@ -16,22 +17,23 @@ namespace malashenko
     std::vector< Point > points;
   };
 
-  namespace detail
-  {
-    struct Triangle {
-      Triangle(Point, Point, Point, Polygon&);
-      Point t1, t2, t3;
-      Polygon& polRef;
-    };
+  struct Triangle {
+    Triangle() = default;
+    Triangle(const Point&, const Point&, const Point&, const Polygon& pol);
 
-    std::vector< Triangle > convertToTriangle(const Polygon& pol);
-    std::vector< int > convertToSquares(const std::vector< Triangle >& triangles);
-    int calcPolygonSquare(const std::vector< int >& squares);
-    Triangle makeTriangle(const Polygon& pol);
-    int countTriangleSquare(const std::vector< Triangle >& triangles);
-  }
+    Point t1, t2, t3;
+    Polygon parentPolygon;
+  };
 
 
+  Triangle makeTriangle(const Polygon&, const Point&, const Point&);
+  std::vector< Triangle > convertToTriangles(const Polygon&);
+
+
+  double countTriangleArea(const Triangle&);
+  std::vector< double > convertToAreas(const std::vector< Triangle >&);
+
+  double sumArea(const std::vector< double >&);
 }
 
 

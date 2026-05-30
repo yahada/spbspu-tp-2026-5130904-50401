@@ -1,48 +1,50 @@
 #include "polygon.hpp"
 
-using p_t = malashenko::Point;
 
-malashenko::detail::Triangle::Triangle(p_t a, p_t b, p_t c, Polygon& pol):
+malashenko::Triangle::Triangle(const malashenko::Point& a, const malashenko::Point& b, const malashenko::Point& c, const Polygon& pol):
   t1(a),
   t2(b),
   t3(c),
-  polRef(pol)
+  parentPolygon(pol)
 {}
 
-malashenko::detail::Triangle malashenko::detail::makeTriangle(Polygon& pol)
+malashenko::Triangle malashenko::makeTriangle(const Polygon& pol, const malashenko::Point& p1, const malashenko::Point& p2)
 {
-  static size_t pointPos = 0;
-  return {pol.points[0], pol.points[++pointPos], pol.points[++pointPos], pol};
+  Triangle tri(pol.points[0], p1, p2, pol);
+  return tri;
 }
 
-int malashenko::detail::countTriangleSquare(const std::vector< Triangle >& triangles)
+double malashenko::countTriangleArea(const Triangle& tri)
 {
-  static size_t triPos = 0;
-  Triangle tri = triangles[triPos];
   Point p1 = tri.t1;
   Point p2 = tri.t2;
   Point p3 = tri.t3;
-  ++triPos;
-  return std::abs(p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y)) / 2;
+  int tmp = std::abs(p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y));
+  return static_cast< double >(tmp) / 2;
 }
 
 
-std::vector< malashenko::detail::Triangle > malashenko::detail::convertToTriangle(const Polygon& pol)
+std::vector< malashenko::Triangle > malashenko::convertToTriangles(const Polygon& pol)
 {
   std::vector< Triangle > res(pol.points.size() - 2);
-  std::generate(res.begin(), res.end(), makeTriangle(pol));
+  std::transform(++pol.points.cbegin(),
+                  pol.points.cend(),
+                  (pol.points.cbegin() + 2),
+                  res.begin(),
+                  std::bind(makeTriangle, pol, std::placeholders::_1, std::placeholders::_2));
   return res;
 }
 
-std::vector< int > malashenko::detail::convertToSquares(const std::vector< Triangle >& triangles)
+std::vector< double > malashenko::convertToAreas(const std::vector< Triangle >& triVec)
 {
-  std::vector< int > res(triangles.size());
-  std::generate(res.begin(), res.end(), countTriangleSquare(triangles));
+  std::vector< double > res(triVec.size());
+  std::transform(triVec.cbegin(), triVec.cend(), res.begin(), countTriangleArea);
+  return res;
 }
 
-int malashenko::detail::calcPolygonSquare(const std::vector< int >& squares)
+double malashenko::sumArea(const std::vector< double >& areas)
 {
-  return std::accumulate(squares.begin(), squares.end(), 0);
+  return std::accumulate(areas.cbegin(), areas.cend(), 0);
 }
 
 
