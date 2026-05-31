@@ -18,6 +18,8 @@ namespace malashenko
     size_t getMinAmoutOfVertexes() const;
     size_t getAmountOfFiguresByParity(bool isEven) const;
     size_t getAmountOfFiguresByAmountOfVertexes(size_t amount) const;
+    size_t getAmoutntOfRightShapes() const;
+    size_t getIntersections(const Polygon& target) const;
 
   private:
     std::vector< Polygon > polygons_;
@@ -27,9 +29,14 @@ namespace malashenko
     std::vector< Polygon > filterByAmountOfVertexes(size_t amount) const;
   };
 
-  bool isEvenCheck(const Polygon& pol, bool isEven);
-  bool isEqualCheck(const Polygon& pol, size_t amount);
-  size_t vertexes(const Polygon& pol);
+
+  namespace detail
+  {
+    bool isEvenCheck(const Polygon& pol, bool isEven);
+    bool isEqualCheck(const Polygon& pol, size_t amount);
+    size_t vertexes(const Polygon& pol);
+  }
+
 }
 
 #endif

@@ -23,7 +23,6 @@ int main(int argc, char** argv)
   figures.getData(input);
 
   Commands::figures = &figures;
-  std::cout << &figures << '\n';
 
   std::vector< Commands > v;
   std::copy(

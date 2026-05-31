@@ -3,17 +3,9 @@
 using p_t = malashenko::Point;
 using pol_t = malashenko::Polygon;
 
-
-malashenko::Triangle::Triangle(const p_t& a, const p_t& b, const p_t& c):
-  t1(a),
-  t2(b),
-  t3(c)
-{}
-
 malashenko::Triangle malashenko::makeTriangle(const pol_t& pol, const p_t& p1, const p_t& p2)
 {
-  Triangle tri(pol.points[0], p1, p2);
-  return tri;
+  return {pol.points[0], p1, p2};
 }
 
 double malashenko::countTriangleArea(const Triangle& tri)
@@ -28,28 +20,153 @@ double malashenko::countTriangleArea(const Triangle& tri)
 
 std::vector< malashenko::Triangle > malashenko::convertToTriangles(const pol_t& pol)
 {
+  if (pol.points.size() == 3)
+  {
+    return {{pol.points[0], pol.points[1], pol.points[2]}};
+  }
+
   using namespace std::placeholders;
-  std::vector< Triangle > res(pol.points.size() - 2);
-  std::transform(++pol.points.cbegin(),
-                  pol.points.cend(),
-                  (pol.points.cbegin() + 2),
-                  res.begin(),
-                  std::bind(makeTriangle, pol, _1, _2));
+  std::vector< Triangle > res;
+  std::transform(
+      pol.points.cbegin() + 1,
+      pol.points.cend() - 1,
+      pol.points.cbegin() + 2,
+      std::back_inserter(res),
+      std::bind(makeTriangle, pol, _1, _2)
+  );
+
   return res;
 }
 
+
+
 std::vector< double > malashenko::convertToAreas(const std::vector< Triangle >& triVec)
 {
-  std::vector< double > res(triVec.size());
-  std::transform(triVec.cbegin(), triVec.cend(), res.begin(), countTriangleArea);
+  std::vector< double > res;
+
+  std::transform(
+      triVec.cbegin(),
+      triVec.cend(),
+      std::back_inserter(res),
+      countTriangleArea
+  );
+
   return res;
 }
 
 double malashenko::sumArea(const std::vector< double >& areas)
 {
-  return std::accumulate(areas.cbegin(), areas.cend(), 0);
+  return std::accumulate(areas.begin(), areas.end(), 0.0f);
+}
+
+bool malashenko::hasRightAngle(const pol_t& pol, size_t i)
+{
+  std::vector< p_t > pts = pol.points;
+  size_t n = pts.size();
+
+  size_t prev = (i + n - 1) % n;
+  size_t next = (i + 1) % n;
+
+  Point v1{pts[prev].x - pts[i].x, pts[prev].y - pts[i].y};
+  Point v2{pts[next].x - pts[i].x, pts[next].y - pts[i].y};
+
+  return v1.x * v2.x + v1.y * v2.y == 0;
 }
 
 
+bool malashenko::hasRightAngleInPolygon(const pol_t& pol)
+{
+  std::vector< size_t > indices(pol.points.size());
+  std::iota(indices.begin(), indices.end(), 0);
+
+  using namespace std::placeholders;
+  auto it = std::find_if(
+    indices.cbegin(),
+    indices.cend(),
+    std::bind(hasRightAngle, std::cref(pol), _1)
+  );
+
+  return it != indices.cend();
+}
 
 
+std::vector< malashenko::Segment > malashenko::getSegments(const pol_t& pol)
+{
+  std::vector< Segment > res;
+
+  std::transform(
+      pol.points.cbegin(),
+      pol.points.cend() - 1,
+      pol.points.cbegin() + 1,
+      std::back_inserter(res),
+      makeSegment
+  );
+
+  res.push_back({pol.points.back(), pol.points.front()});
+
+  return res;
+}
+
+malashenko::Segment malashenko::makeSegment(const Point& p1, const Point& p2)
+{
+  return {p1, p2};
+}
+
+int malashenko::orient(const Point& a, const Point& b, const Point& c)
+{
+  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+}
+
+bool malashenko::onSegment(const Point& a, const Point& b, const Point& p)
+{
+  bool res =std::min(a.x, b.x) <= p.x;
+  res = res && p.x <= std::max(a.x, b.x);
+  res = res && std::min(a.y, b.y) <= p.y;
+  return res && p.y <= std::max(a.y, b.y);
+}
+
+bool malashenko::segmentsIntersect(const Segment& s1, const Segment& s2)
+{
+  auto o1 = orient(s1.p1, s1.p2, s2.p1);
+  auto o2 = orient(s1.p1, s1.p2, s2.p2);
+
+  auto o3 = orient(s2.p1, s2.p2, s1.p1);
+  auto o4 = orient(s2.p1, s2.p2, s1.p2);
+
+  bool check = (o1 == 0 && onSegment(s1.p1, s1.p2, s2.p1));
+  check = check || (o2 == 0 && onSegment(s1.p1, s1.p2, s2.p2));
+  check = check || (o3 == 0 && onSegment(s2.p1, s2.p2, s1.p1));
+  check = check || (o4 == 0 && onSegment(s2.p1, s2.p2, s1.p2));
+
+  if (check)
+  {
+    return true;
+  }
+
+  return ((o1 > 0) != (o2 > 0)) && ((o3 > 0) != (o4 > 0));
+}
+
+bool malashenko::intersectsWithAny(const Segment& seg, const std::vector< Segment >& segments)
+{
+  using namespace std::placeholders;
+
+  return std::any_of(
+      segments.cbegin(),
+      segments.cend(),
+      std::bind(segmentsIntersect, seg, _1)
+  );
+}
+
+bool malashenko::polygonsIntersect(const Polygon& lhs, const Polygon& rhs)
+{
+  auto segs1 = getSegments(lhs);
+  auto segs2 = getSegments(rhs);
+
+  using namespace std::placeholders;
+
+  return std::any_of(
+      segs1.cbegin(),
+      segs1.cend(),
+      std::bind(intersectsWithAny, _1, std::cref(segs2))
+  );
+}

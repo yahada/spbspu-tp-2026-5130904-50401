@@ -14,6 +14,8 @@ namespace malashenko
     char exp_;
   };
 
+  struct Commands;
+
   class IOguard
   {
   public:
@@ -30,6 +32,7 @@ namespace malashenko
   std::istream& operator>>(std::istream& in, Point& pt);
   std::istream& operator>>(std::istream& in, Polygon& pol);
   std::istream& operator>>(std::istream& in, Delimiter&& del);
+  std::istream& operator>>(std::istream& in, Commands& cmds);
 
 }
 

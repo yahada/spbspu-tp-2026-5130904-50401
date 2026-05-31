@@ -10,7 +10,6 @@
 namespace malashenko
 {
   class Figures;
-  struct Command;
 
   struct Commands {
     static Figures* figures;
@@ -20,13 +19,9 @@ namespace malashenko
     void max(std::istream&, std::ostream&);
     void min(std::istream&, std::ostream&);
     void count(std::istream&, std::ostream&);
-
+    void rightshapes(std::istream&, std::ostream&);
+    void intersections(std::istream&, std::ostream&);
   };
-
-  std::istream& operator>>(std::istream& in, Commands& cmds);
-
-
-
 }
 
 
