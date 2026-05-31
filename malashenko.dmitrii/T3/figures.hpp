@@ -22,7 +22,7 @@ namespace malashenko
     size_t getIntersections(const Polygon& target) const;
     bool isEmpty() const;
 
-  // private:
+  private:
     std::vector< Polygon > polygons_;
     std::vector< double > getPolygonsAreas(const std::vector< Polygon >& polygons) const;
     std::vector< size_t > getAmountsOfVertexes(const std::vector< Polygon >& polygons) const;

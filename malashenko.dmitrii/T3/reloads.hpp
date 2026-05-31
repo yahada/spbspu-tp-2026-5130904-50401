@@ -33,6 +33,11 @@ namespace malashenko
   std::istream& operator>>(std::istream& in, Polygon& pol);
   std::istream& operator>>(std::istream& in, Delimiter&& del);
   std::istream& operator>>(std::istream& in, Commands& cmds);
+  namespace detail
+  {
+    Point nextSymbolChecker(std::istream& in, const Point& point);
+  }
+
 
 }
 

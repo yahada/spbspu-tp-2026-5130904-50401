@@ -75,10 +75,9 @@ struct PointExtractor
 };
 
 
-malashenko::Point checkNextEnter(std::istream& in, const malashenko::Point& point)
+malashenko::Point malashenko::detail::nextSymbolChecker(std::istream& in, const Point& point)
 {
-  char c = in.peek();
-  if (c == '\n')
+  if (in.peek() == '\n')
   {
     in.setstate(std::ios::eofbit);
   }
@@ -94,21 +93,27 @@ std::istream& malashenko::operator>>(std::istream& in, Polygon& polygon)
   {
     return in;
   }
-  size_t cnt_points;
-  in >> cnt_points;
-  if (!in || cnt_points < 3)
+  size_t n;
+  in >> n;
+  if (!in || n < 3)
   {
     in.setstate(std::ios::failbit);
     return in;
   }
-  std::vector< Point > tested;
-  auto begin = std::istream_iterator< Point >(in), end = std::istream_iterator< Point >();
-  std::transform(begin, end, std::back_inserter(tested), std::bind(checkNextEnter, std::ref(in), _1));
 
-  if (tested.size() == cnt_points && in.eof())
+  std::vector< Point > points;
+  using iit_t = std::istream_iterator< Point >;
+  std::transform(
+      iit_t{in},
+      iit_t{},
+      std::back_inserter(points),
+      std::bind(detail::nextSymbolChecker, std::ref(in), _1)
+  );
+
+  if (points.size() == n && in.eof())
   {
     in.clear();
-    polygon.points = std::move(tested);
+    polygon.points = std::move(points);
   }
   else
   {

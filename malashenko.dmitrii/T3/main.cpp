@@ -26,10 +26,11 @@ int main(int argc, char** argv)
   Commands::figures = &figures;
 
   std::vector< Commands > v;
+  using iit_t = std::istream_iterator<Commands>;
   std::copy(
-    std::istream_iterator<Commands>(std::cin),
-    std::istream_iterator<Commands>(),
-    std::back_inserter(v)
+      iit_t{std::cin},
+      iit_t{},
+      std::back_inserter(v)
   );
 
   return 0;
