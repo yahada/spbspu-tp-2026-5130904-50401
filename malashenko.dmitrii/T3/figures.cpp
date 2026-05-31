@@ -152,6 +152,10 @@ size_t malashenko::Figures::getAmountOfFiguresByParity(bool isEven) const
 
 size_t malashenko::Figures::getAmountOfFiguresByAmountOfVertexes(size_t amount) const
 {
+  if (amount < 3)
+  {
+    throw std::invalid_argument("INVALID AMOUNT OF VERTEXES");
+  }
   std::vector< Polygon > filteredPolygons = filterByAmountOfVertexes(amount);
 
   return filteredPolygons.size();

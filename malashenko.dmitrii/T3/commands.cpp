@@ -6,10 +6,7 @@ malashenko::Figures* malashenko::Commands::figures = nullptr;
 
 void malashenko::Commands::area(std::istream& in, std::ostream& out)
 {
-  if (figures->isEmpty())
-  {
-        throw std::invalid_argument("THERE'RE NO FIGURES");
-  }
+
   std::string param;
   if (!(in >> param))
   {
@@ -37,6 +34,10 @@ void malashenko::Commands::area(std::istream& in, std::ostream& out)
     }
     else if (param == "MEAN")
     {
+      if (figures->isEmpty())
+      {
+        throw std::invalid_argument("THERE'RE NO FIGURES");
+      }
       res = figures->getAverageArea();
     }
     else
@@ -45,12 +46,7 @@ void malashenko::Commands::area(std::istream& in, std::ostream& out)
     }
   }
   out << std::fixed << std::setprecision(1);
-  out << res;
-  if (static_cast< int >(res) == res)
-  {
-    out << ".0";
-  }
-  out << '\n';
+  out << res << '\n';
 }
 
 
@@ -70,12 +66,8 @@ void malashenko::Commands::max(std::istream& in, std::ostream& out)
   if (param == "AREA")
   {
     double res = figures->getMaxArea();
-    out << res;
-    if (static_cast< int >(res) == res)
-    {
-      out << ".0";
-    }
-    out << '\n';
+    out << std::fixed << std::setprecision(1);
+    out << res << '\n';
 
   }
   else if (param == "VERTEXES")
@@ -107,12 +99,8 @@ void malashenko::Commands::min(std::istream& in, std::ostream& out)
   if (param == "AREA")
   {
     double res = figures->getMinArea();
-    out << res;
-    if (static_cast< int >(res) == res)
-    {
-      out << ".0";
-    }
-    out << '\n';
+    out << std::fixed << std::setprecision(1);
+    out << res << '\n';
   }
   else if (param == "VERTEXES")
   {
@@ -127,10 +115,6 @@ void malashenko::Commands::min(std::istream& in, std::ostream& out)
 
 void malashenko::Commands::count(std::istream& in, std::ostream& out)
 {
-  if (figures->isEmpty())
-  {
-    throw std::invalid_argument("THERE'RE NO FIGURES");
-  }
 
   std::string param;
   if (!(in >> param))
