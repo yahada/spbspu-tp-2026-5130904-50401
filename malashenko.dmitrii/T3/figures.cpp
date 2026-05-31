@@ -163,12 +163,12 @@ void malashenko::Figures::getData(std::istream& in)
 
   in >> p;
 
-  if (in.eof() && p.points.empty())
+  if (in.eof() || p.points.empty())
   {
     return;
   }
 
-  if (in.fail())
+  if (in.fail() || in.eof())
   {
     in.clear();
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');

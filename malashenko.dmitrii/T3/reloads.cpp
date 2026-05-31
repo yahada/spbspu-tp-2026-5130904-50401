@@ -59,50 +59,62 @@ std::istream& malashenko::operator>>(std::istream& in, Point& pt)
   pt.y = y;
   return in;
 }
-
-std::istream& malashenko::operator>>(std::istream& in, Polygon& pol)
+struct PointExtractor
 {
-  std::istream::sentry sentry(in);
-  if (!sentry)
+  std::istream &in;
+  malashenko::Point operator()()
+  {
+    malashenko::Point p;
+    in >> p; // Используем твой существующий operator>>
+    if (!in)
+    {
+      throw std::runtime_error("Parse error");
+    }
+    return p;
+  }
+};
+
+
+malashenko::Point checkNextEnter(std::istream& in, const malashenko::Point& point)
+{
+  char c = in.peek();
+  if (c == '\n')
+  {
+    in.setstate(std::ios::eofbit);
+  }
+  return point;
+}
+
+std::istream& malashenko::operator>>(std::istream& in, Polygon& polygon)
+{
+  using namespace std::placeholders;
+
+  std::istream::sentry s(in);
+  if (!s)
   {
     return in;
   }
-  IOguard guard(in);
-
-  size_t n = 0;
-  in >> n;
-
-  if (!in || n < 3)
+  size_t cnt_points;
+  in >> cnt_points;
+  if (!in || cnt_points < 3)
   {
     in.setstate(std::ios::failbit);
-    pol.points.clear();
     return in;
   }
+  std::vector< Point > tested;
+  auto begin = std::istream_iterator< Point >(in), end = std::istream_iterator< Point >();
+  std::transform(begin, end, std::back_inserter(tested), std::bind(checkNextEnter, std::ref(in), _1));
 
-  std::vector< Point > tmp;
-  tmp.reserve(n);
-
-  using it_t = std::istream_iterator< Point >;
-  std::copy_n(it_t{in}, n , std::back_inserter(tmp));
-
-  std::string line;
-  std::getline(in, line);
-
-  if (std::find(line.begin(), line.end(), '(') != line.end())
+  if (tested.size() == cnt_points && in.eof())
   {
-    in.setstate(std::ios::failbit);
-    pol.points.clear();
-  }
-  else if (in && tmp.size() == n)
-  {
-    pol.points = std::move(tmp);
+    in.clear();
+    polygon.points = std::move(tested);
   }
   else
   {
+    in.clear();
     in.setstate(std::ios::failbit);
-    pol.points.clear();
   }
-
   return in;
 }
 

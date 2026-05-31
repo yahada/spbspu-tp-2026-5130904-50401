@@ -170,12 +170,19 @@ void malashenko::Commands::intersections(std::istream& in, std::ostream& out)
 {
   if (figures->isEmpty())
   {
-    throw std::invalid_argument("THERE'RE NO FIGURES");
+    out << "<INVALID COMMAND>" << '\n';
+    return;
   }
+
   Polygon pol;
-  if (!(in >> pol))
+  in >> pol;
+
+  in >> std::ws;
+  if (!in)
   {
-    throw std::invalid_argument("INPUT PROBLEMS");
+    throw std::logic_error("invalid polygon");
   }
+
+
   out << figures->getIntersections(pol) << '\n';
 }
