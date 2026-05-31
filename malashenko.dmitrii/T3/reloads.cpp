@@ -28,7 +28,7 @@ std::istream& malashenko::operator>>(std::istream& in, Delimiter&& del)
   {
     return in;
   }
-
+  IOguard guard(in);
   char c = 0;
   in >> c;
   if (in && c != del.exp_)
@@ -45,6 +45,7 @@ std::istream& malashenko::operator>>(std::istream& in, Point& pt)
   {
     return in;
   }
+  IOguard guard(in);
 
   int x = 0, y = 0;
   using d_t = Delimiter;
@@ -66,18 +67,33 @@ std::istream& malashenko::operator>>(std::istream& in, Polygon& pol)
   {
     return in;
   }
+  IOguard guard(in);
 
   size_t n = 0;
   in >> n;
+
   if (!in || n < 3)
   {
     in.setstate(std::ios::failbit);
+    pol.points.clear();
     return in;
   }
 
-  pol.points.resize(n);
+  std::vector< Point > tmp;
+  tmp.reserve(n);
 
-  std::copy_n(std::istream_iterator< Point >(in), n, pol.points.begin());
+  using it_t = std::istream_iterator<Point>;
+  std::copy_n(it_t{in}, n, std::back_inserter(tmp));
+
+  if (in && tmp.size() == n)
+  {
+    pol.points = std::move(tmp);
+  }
+  else
+  {
+    in.setstate(std::ios::failbit);
+    pol.points.clear();
+  }
 
   return in;
 }
@@ -115,6 +131,7 @@ std::istream& malashenko::operator>>(std::istream& in, Commands& cmds)
   catch (...)
   {
     std::cout << "<INVALID COMMAND>" << '\n';
+    in.clear();
     in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
   }
 

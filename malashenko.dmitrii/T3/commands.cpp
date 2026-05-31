@@ -17,6 +17,10 @@ void malashenko::Commands::area(std::istream& in, std::ostream& out)
   try
   {
     size_t amountOfVertexes = std::stoull(param);
+    if (amountOfVertexes < 3)
+    {
+      throw std::invalid_argument("INVALID AMOUNT OF VERTEXES");
+    }
     res = figures->getAreaByAmountOfVertexes(amountOfVertexes);
   }
   catch(...)
@@ -125,6 +129,10 @@ void malashenko::Commands::count(std::istream& in, std::ostream& out)
   try
   {
     size_t amountOfVertexes = std::stoull(param);
+    if (amountOfVertexes < 3)
+    {
+      throw std::invalid_argument("INVALID AMOUNT OF VERTEXES");
+    }
     out << figures->getAmountOfFiguresByAmountOfVertexes(amountOfVertexes) << '\n';
     return;
   }

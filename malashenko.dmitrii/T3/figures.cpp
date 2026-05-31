@@ -152,10 +152,6 @@ size_t malashenko::Figures::getAmountOfFiguresByParity(bool isEven) const
 
 size_t malashenko::Figures::getAmountOfFiguresByAmountOfVertexes(size_t amount) const
 {
-  if (amount < 3)
-  {
-    throw std::invalid_argument("INVALID AMOUNT OF VERTEXES");
-  }
   std::vector< Polygon > filteredPolygons = filterByAmountOfVertexes(amount);
 
   return filteredPolygons.size();
@@ -163,15 +159,29 @@ size_t malashenko::Figures::getAmountOfFiguresByAmountOfVertexes(size_t amount) 
 
 void malashenko::Figures::getData(std::istream& in)
 {
-  std::vector< Polygon > polygons;
+  Polygon p;
 
-  std::copy(
-      std::istream_iterator< Polygon >(in),
-      std::istream_iterator< Polygon >(),
-      std::back_inserter(polygons)
-  );
+  in >> p;
 
-  polygons_ = polygons;
+  if (in.eof() && p.points.empty())
+  {
+    return;
+  }
+
+  if (in.fail())
+  {
+    in.clear();
+    in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+  }
+  else if (!p.points.empty())
+  {
+    polygons_.push_back(std::move(p));
+  }
+
+  if (!in.eof())
+  {
+    getData(in);
+  }
 }
 
 size_t malashenko::Figures::getAmoutntOfRightShapes() const
