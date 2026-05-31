@@ -194,3 +194,9 @@ size_t malashenko::Figures::getIntersections(const Polygon& target) const
   );
 }
 
+
+bool malashenko::Figures::isEmpty() const
+{
+  return polygons_.empty();
+}
+

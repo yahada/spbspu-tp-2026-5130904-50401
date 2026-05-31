@@ -20,6 +20,7 @@ namespace malashenko
     size_t getAmountOfFiguresByAmountOfVertexes(size_t amount) const;
     size_t getAmoutntOfRightShapes() const;
     size_t getIntersections(const Polygon& target) const;
+    bool isEmpty() const;
 
   private:
     std::vector< Polygon > polygons_;

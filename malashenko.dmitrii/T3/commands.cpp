@@ -1,11 +1,15 @@
 #include "commands.hpp"
 #include <assert.h>
-
+#include <iomanip>
 
 malashenko::Figures* malashenko::Commands::figures = nullptr;
 
 void malashenko::Commands::area(std::istream& in, std::ostream& out)
 {
+  if (figures->isEmpty())
+  {
+        throw std::invalid_argument("THERE'RE NO FIGURES");
+  }
   std::string param;
   if (!(in >> param))
   {
@@ -40,7 +44,7 @@ void malashenko::Commands::area(std::istream& in, std::ostream& out)
       throw std::invalid_argument("UNKNOWN PARAMETR");
     }
   }
-
+  out << std::fixed << std::setprecision(1);
   out << res;
   if (static_cast< int >(res) == res)
   {
@@ -52,6 +56,11 @@ void malashenko::Commands::area(std::istream& in, std::ostream& out)
 
 void malashenko::Commands::max(std::istream& in, std::ostream& out)
 {
+  if (figures->isEmpty())
+  {
+    throw std::invalid_argument("THERE'RE NO FIGURES");
+  }
+
   std::string param;
   if (!(in >> param))
   {
@@ -82,6 +91,11 @@ void malashenko::Commands::max(std::istream& in, std::ostream& out)
 
 void malashenko::Commands::min(std::istream& in, std::ostream& out)
 {
+  if (figures->isEmpty())
+  {
+    throw std::invalid_argument("THERE'RE NO FIGURES");
+  }
+
   assert(figures != nullptr);
 
   std::string param;
@@ -113,6 +127,11 @@ void malashenko::Commands::min(std::istream& in, std::ostream& out)
 
 void malashenko::Commands::count(std::istream& in, std::ostream& out)
 {
+  if (figures->isEmpty())
+  {
+    throw std::invalid_argument("THERE'RE NO FIGURES");
+  }
+
   std::string param;
   if (!(in >> param))
   {
@@ -148,11 +167,19 @@ void malashenko::Commands::count(std::istream& in, std::ostream& out)
 
 void malashenko::Commands::rightshapes(std::istream&, std::ostream& out)
 {
+  if (figures->isEmpty())
+  {
+    throw std::invalid_argument("THERE'RE NO FIGURES");
+  }
   out << figures->getAmoutntOfRightShapes() << '\n';
 }
 
 void malashenko::Commands::intersections(std::istream& in, std::ostream& out)
 {
+  if (figures->isEmpty())
+  {
+    throw std::invalid_argument("THERE'RE NO FIGURES");
+  }
   Polygon pol;
   if (!(in >> pol))
   {
