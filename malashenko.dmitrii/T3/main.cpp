@@ -22,6 +22,7 @@ int main(int argc, char** argv)
   Figures figures{};
   figures.getData(input);
 
+
   Commands::figures = &figures;
 
   std::vector< Commands > v;

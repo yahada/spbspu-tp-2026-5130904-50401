@@ -160,28 +160,18 @@ size_t malashenko::Figures::getAmountOfFiguresByAmountOfVertexes(size_t amount) 
 void malashenko::Figures::getData(std::istream& in)
 {
   Polygon p;
-
   in >> p;
 
-  if (in.eof() || p.points.empty())
-  {
-    return;
-  }
+  if (in.eof() && p.points.empty()) return; // Корректный выход при EOF
 
-  if (in.fail() || in.eof())
-  {
+  if (in.fail()) {
     in.clear();
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  }
-  else if (!p.points.empty())
-  {
+  } else if (!p.points.empty()) {
     polygons_.push_back(std::move(p));
   }
 
-  if (!in.eof())
-  {
-    getData(in);
-  }
+  if (!in.eof()) getData(in);
 }
 
 size_t malashenko::Figures::getAmoutntOfRightShapes() const
