@@ -119,31 +119,26 @@ int malashenko::orient(const Point& a, const Point& b, const Point& c)
 
 bool malashenko::onSegment(const Point& a, const Point& b, const Point& p)
 {
-  bool res =std::min(a.x, b.x) <= p.x;
-  res = res && p.x <= std::max(a.x, b.x);
-  res = res && std::min(a.y, b.y) <= p.y;
-  return res && p.y <= std::max(a.y, b.y);
+  bool res = orient(a, b, p) == 0 && std::min(a.x, b.x) <= p.x;
+  res = res && p.x <= std::max(a.x, b.x) && std::min(a.y, b.y) <= p.y && p.y <= std::max(a.y, b.y);
+  return res;
 }
 
 bool malashenko::segmentsIntersect(const Segment& s1, const Segment& s2)
 {
   auto o1 = orient(s1.p1, s1.p2, s2.p1);
   auto o2 = orient(s1.p1, s1.p2, s2.p2);
-
   auto o3 = orient(s2.p1, s2.p2, s1.p1);
   auto o4 = orient(s2.p1, s2.p2, s1.p2);
 
-  bool check = (o1 == 0 && onSegment(s1.p1, s1.p2, s2.p1));
-  check = check || (o2 == 0 && onSegment(s1.p1, s1.p2, s2.p2));
-  check = check || (o3 == 0 && onSegment(s2.p1, s2.p2, s1.p1));
-  check = check || (o4 == 0 && onSegment(s2.p1, s2.p2, s1.p2));
-
-  if (check)
+  bool res = (o1 == 0 && onSegment(s1.p1, s1.p2, s2.p1)) || (o2 == 0 && onSegment(s1.p1, s1.p2, s2.p2));
+  res = res || (o3 == 0 && onSegment(s2.p1, s2.p2, s1.p1)) || (o4 == 0 && onSegment(s2.p1, s2.p2, s1.p2));
+  if (res)
   {
     return true;
   }
 
-  return ((o1 > 0) != (o2 > 0)) && ((o3 > 0) != (o4 > 0));
+  return (o1 * o2 < 0) && (o3 * o4 < 0);
 }
 
 bool malashenko::intersectsWithAny(const Segment& seg, const std::vector< Segment >& segments)
@@ -159,14 +154,71 @@ bool malashenko::intersectsWithAny(const Segment& seg, const std::vector< Segmen
 
 bool malashenko::polygonsIntersect(const Polygon& lhs, const Polygon& rhs)
 {
-  auto segs1 = getSegments(lhs);
-  auto segs2 = getSegments(rhs);
+    auto segs1 = getSegments(lhs);
+    auto segs2 = getSegments(rhs);
 
-  using namespace std::placeholders;
+    using namespace std::placeholders;
 
-  return std::any_of(
-      segs1.cbegin(),
-      segs1.cend(),
-      std::bind(intersectsWithAny, _1, std::cref(segs2))
-  );
+    if (std::any_of(segs1.cbegin(), segs1.cend(), std::bind(intersectsWithAny, _1, std::cref(segs2))))
+    {
+        return true;
+    }
+
+
+    if (isPointInPolygon(lhs.points.front(), rhs))
+    {
+        return true;
+    }
+
+    if (isPointInPolygon(rhs.points.front(), lhs))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool malashenko::rayIntersectsSegment(const Point& p, const Segment& s)
+{
+    double py = static_cast<double>(p.y);
+    double y1 = static_cast<double>(s.p1.y);
+    double y2 = static_cast<double>(s.p2.y);
+
+    if (py < std::min(y1, y2) || py >= std::max(y1, y2))
+    {
+        return false;
+    }
+
+    if (y1 == y2)
+    {
+        return false;
+    }
+
+    double x1 = static_cast<double>(s.p1.x);
+    double x2 = static_cast<double>(s.p2.x);
+
+    double x_intersect = x1 + (py - y1) * (x2 - x1) / (y2 - y1);
+
+    return x_intersect > p.x;
+}
+
+bool malashenko::isPointInPolygon(const Point& p, const Polygon& pol)
+{
+    if (pol.points.empty())
+    {
+        return false;
+    }
+
+    auto segs = getSegments(pol);
+
+
+    using namespace std::placeholders;
+
+    int intersections = std::count_if(
+        segs.begin(),
+        segs.end(),
+        std::bind(rayIntersectsSegment, p, _1)
+    );
+
+    return (intersections % 2) != 0;
 }

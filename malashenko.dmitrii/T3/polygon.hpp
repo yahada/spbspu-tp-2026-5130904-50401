@@ -48,6 +48,8 @@ namespace malashenko
   bool segmentsIntersect(const Segment& s1, const Segment& s2);
   bool intersectsWithAny(const Segment& seg, const std::vector< Segment >& segments);
   bool polygonsIntersect(const Polygon& lhs, const Polygon& rhs);
+  bool rayIntersectsSegment(const Point& p, const Segment& s);
+  bool isPointInPolygon(const Point& p, const Polygon& pol);
 }
 
 

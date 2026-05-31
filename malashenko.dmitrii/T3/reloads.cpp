@@ -82,10 +82,18 @@ std::istream& malashenko::operator>>(std::istream& in, Polygon& pol)
   std::vector< Point > tmp;
   tmp.reserve(n);
 
-  using it_t = std::istream_iterator<Point>;
-  std::copy_n(it_t{in}, n, std::back_inserter(tmp));
+  using it_t = std::istream_iterator< Point >;
+  std::copy_n(it_t{in}, n , std::back_inserter(tmp));
 
-  if (in && tmp.size() == n)
+  std::string line;
+  std::getline(in, line);
+
+  if (std::find(line.begin(), line.end(), '(') != line.end())
+  {
+    in.setstate(std::ios::failbit);
+    pol.points.clear();
+  }
+  else if (in && tmp.size() == n)
   {
     pol.points = std::move(tmp);
   }
